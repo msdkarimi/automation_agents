@@ -1,0 +1,103 @@
+@font-face {
+    font-family: 'typeMachineFont';
+    src: url('../assets/fonts/TypeMachine.ttf') format('truetype');
+  }
+
+  
+@font-face {
+  font-family: 'typeWritter';
+  src: url('../assets/fonts/TypeWritter.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'academyFont';
+  src: url('../assets/fonts/Academy.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'campuseFont';
+  src: url('../assets/fonts/campuse.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'MinecrafterFont';
+  src: url('../assets/fonts/Minecrafter.Reg.ttf') format('truetype');
+  font-weight: 700;
+}
+
+
+.custom-font-tab {
+font-family: 'typeWritter', sans-serif;
+}
+
+.custom-font-body {
+  font-family: 'typeMachineFont', sans-serif;
+  }
+
+.justify-left {
+  text-align: justify;
+  direction: ltr; /* Start from the right */
+}
+
+
+.flex-container {
+  /* height: calc(100vh - 200px); */
+  max-height: calc(100vh - 200px);
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.limited-height-flex {
+  max-height: calc(100vh - 100px);
+  display: flex;
+}
+
+.fill-flex-column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+}
+
+.my_border_radius {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.my_grow {
+  flex-grow: 1;
+}
+
+.padding_top {
+  padding-top: 10px;
+}
+
+.mantine-Modal-content {
+  border: 2px solid #007bff; /* Blue border */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+  background-color: #fff; /* White background */
+}
+
+.mantine-Modal-header {
+  border-bottom: 1px solid #e0e0e0; /* Frame the header */
+  padding-bottom: 10px;
+}
+
+
+.my_text_area {
+  width: 100%;
+  max-width: 100%;       /* prevents growing wider than parent */
+  height: 100%;
+  max-height: 100%;      /* optional: prevents vertical overflow */
+  resize: both;          /* or 'horizontal', 'vertical' */
+  box-sizing: border-box;
+}
+
+.preline-text {
+  white-space: pre-line;
+  direction: ltr;
+
+}

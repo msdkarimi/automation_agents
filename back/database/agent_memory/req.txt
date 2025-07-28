@@ -1,0 +1,14 @@
+sqlalchemy
+psycopg2-binary
+Flask
+flask-cors
+
+fastapi
+uvicorn
+
+langchain-ollama
+langgraph
+langchain
+langchain-community
+langchain-core
+

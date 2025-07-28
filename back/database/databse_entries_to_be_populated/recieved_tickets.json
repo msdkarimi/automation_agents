@@ -1,0 +1,452 @@
+[
+    {
+        "id": 1,
+        "customer_id": "CUST10001",
+        "customer_comment": "Order #ORD50001: Charged twice for a 55-inch Samsung 4K TV ($600). Total shows $1200 on my card. Please refund one charge.",
+        "status": "open",
+        "subject": "Double Charge Issue",
+        "date_received": "2025-06-01",
+        "date_addressed": ""
+    },
+    {
+        "id": 2,
+        "customer_id": "CUST10002",
+        "customer_comment": "Payment for a Dyson V15 vacuum ($700) was declined, but the amount was deducted. No order confirmation received. Please refund or process.",
+        "status": "open",
+        "subject": "Payment Deducted but Order Not Placed",
+        "date_received": "2025-06-02",
+        "date_addressed": ""
+    },
+    {
+        "id": 3,
+        "customer_id": "CUST10003",
+        "customer_comment": "Order #ORD50002: Purchased a MacBook Air M2 ($1200). Payment failed with 'gateway error,' but my bank shows the charge. Need resolution.",
+        "status": "open",
+        "subject": "Payment Gateway Error",
+        "date_received": "2025-06-03",
+        "date_addressed": ""
+    },
+    {
+        "id": 4,
+        "customer_id": "CUST10004",
+        "customer_comment": "Paid $150 for Bose QuietComfort headphones via PayPal, but payment is stuck in 'processing.' Amount on hold. Please resolve.",
+        "status": "open",
+        "subject": "PayPal Payment Stuck",
+        "date_received": "2025-06-04",
+        "date_addressed": ""
+    },
+    {
+        "id": 5,
+        "customer_id": "CUST10005",
+        "customer_comment": "Order #ORD50003: Overcharged for a Ninja Foodi Grill ($250). Receipt shows $300. Please refund $50.",
+        "status": "close",
+        "subject": "Overcharge on Order",
+        "date_received": "2025-06-05",
+        "date_addressed": ""
+    },
+    {
+        "id": 6,
+        "customer_id": "CUST10006",
+        "customer_comment": "Canceled order for a kids' bicycle ($100) before shipping, but $100 still charged. Please process refund.",
+        "status": "open",
+        "subject": "Refund for Canceled Order",
+        "date_received": "2025-06-06",
+        "date_addressed": ""
+    },
+    {
+        "id": 7,
+        "customer_id": "CUST10007",
+        "customer_comment": "Order #ORD50004: Paid $80 for a wireless keyboard (Logitech MX Keys). Status shows 'payment pending.' Please update or confirm.",
+        "status": "open",
+        "subject": "Payment Pending Issue",
+        "date_received": "2025-06-07",
+        "date_addressed": ""
+    },
+    {
+        "id": 8,
+        "customer_id": "CUST10008",
+        "customer_comment": "$30 discount code not applied for a set of bath towels ($90). Charged full amount. Please refund $30.",
+        "status": "open",
+        "subject": "Discount Code Not Applied",
+        "date_received": "2025-06-08",
+        "date_addressed": ""
+    },
+    {
+        "id": 9,
+        "customer_id": "CUST10009",
+        "customer_comment": "Paid $400 for a Canon EOS R50 camera via Apple Pay. Got 'transaction failed' error, but amount deducted. No order placed. Please refund.",
+        "status": "open",
+        "subject": "Apple Pay Transaction Error",
+        "date_received": "2025-06-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 10,
+        "customer_id": "CUST10010",
+        "customer_comment": "Order #ORD50005: Paid $50 for a desk organizer. Bank flagged transaction as suspicious, order not processed. I confirmed it’s legitimate.",
+        "status": "open",
+        "subject": "Payment Flagged by Bank",
+        "date_received": "2025-06-10",
+        "date_addressed": ""
+    },
+    {
+        "id": 11,
+        "customer_id": "CUST10011",
+        "customer_comment": "Charged $200 for a winter jacket (North Face) twice for order #ORD50006. Please refund one charge.",
+        "status": "open",
+        "subject": "Double Charge Issue",
+        "date_received": "2025-06-11",
+        "date_addressed": ""
+    },
+    {
+        "id": 12,
+        "customer_id": "CUST10012",
+        "customer_comment": "Payment for a Roomba i7 ($500) failed, but amount was deducted. No order confirmation. Please refund.",
+        "status": "open",
+        "subject": "Payment Deducted but Order Not Placed",
+        "date_received": "2025-06-12",
+        "date_addressed": ""
+    },
+    {
+        "id": 13,
+        "customer_id": "CUST10013",
+        "customer_comment": "Order #ORD50007: Paid $300 for a standing desk. Payment error occurred, but charge shows on my card. Please confirm or refund.",
+        "status": "open",
+        "subject": "Payment Gateway Error",
+        "date_received": "2025-06-13",
+        "date_addressed": ""
+    },
+    {
+        "id": 14,
+        "customer_id": "CUST10014",
+        "customer_comment": "Paid $120 for AirPods Pro via Google Pay, stuck in 'processing.' Amount on hold. Please complete or cancel.",
+        "status": "open",
+        "subject": "Google Pay Payment Stuck",
+        "date_received": "2025-06-14",
+        "date_addressed": ""
+    },
+    {
+        "id": 15,
+        "customer_id": "CUST10015",
+        "customer_comment": "Order #ORD50008: Overcharged $50 for a pressure cooker ($150). Receipt shows $200. Please refund difference.",
+        "status": "close",
+        "subject": "Overcharge on Order",
+        "date_received": "2025-06-15",
+        "date_addressed": ""
+    },
+    {
+        "id": 16,
+        "customer_id": "CUST10016",
+        "customer_comment": "Canceled order for a yoga mat ($40) before shipping, but charged. Please refund.",
+        "status": "open",
+        "subject": "Refund for Canceled Order",
+        "date_received": "2025-06-16",
+        "date_addressed": ""
+    },
+    {
+        "id": 17,
+        "customer_id": "CUST10017",
+        "customer_comment": "Order #ORD50009: Paid $90 for a gaming headset. Status shows 'payment pending.' Please update.",
+        "status": "open",
+        "subject": "Payment Pending Issue",
+        "date_received": "2025-06-17",
+        "date_addressed": ""
+    },
+    {
+        "id": 18,
+        "customer_id": "CUST10018",
+        "customer_comment": "$25 discount not applied for a coffee table ($150). Charged full amount. Please refund $25.",
+        "status": "open",
+        "subject": "Discount Code Not Applied",
+        "date_received": "2025-06-18",
+        "date_addressed": ""
+    },
+    {
+        "id": 19,
+        "customer_id": "CUST10019",
+        "customer_comment": "Paid $250 for a smart thermostat via Apple Pay. Transaction failed, but amount deducted. Please refund.",
+        "status": "open",
+        "subject": "Apple Pay Transaction Error",
+        "date_received": "2025-06-19",
+        "date_addressed": ""
+    },
+    {
+        "id": 20,
+        "customer_id": "CUST10020",
+        "customer_comment": "Order #ORD50010: Paid $70 for a backpack. Bank flagged payment, order not processed. Confirmed as legitimate.",
+        "status": "open",
+        "subject": "Payment Flagged by Bank",
+        "date_received": "2025-06-20",
+        "date_addressed": ""
+    },
+    {
+        "id": 21,
+        "customer_id": "CUST10021",
+        "customer_comment": "Order #ORD50011: Double charged $180 for running shoes (Adidas Ultraboost). Please refund one charge.",
+        "status": "open",
+        "subject": "Double Charge Issue",
+        "date_received": "2025-06-21",
+        "date_addressed": ""
+    },
+    {
+        "id": 22,
+        "customer_id": "CUST10022",
+        "customer_comment": "Payment for a Kindle Paperwhite ($130) declined, but amount deducted. No order placed. Please refund.",
+        "status": "open",
+        "subject": "Payment Deducted but Order Not Placed",
+        "date_received": "2025-06-22",
+        "date_addressed": ""
+    },
+    {
+        "id": 23,
+        "customer_id": "CUST10023",
+        "customer_comment": "Order #ORD50012: Paid $600 for a gaming laptop. Payment error, but charge appeared. Please confirm or refund.",
+        "status": "open",
+        "subject": "Payment Gateway Error",
+        "date_received": "2025-06-23",
+        "date_addressed": ""
+    },
+    {
+        "id": 24,
+        "customer_id": "CUST10024",
+        "customer_comment": "Paid $80 for a smart bulb set via PayPal, stuck in 'processing.' Please resolve.",
+        "status": "open",
+        "subject": "PayPal Payment Stuck",
+        "date_received": "2025-06-24",
+        "date_addressed": ""
+    },
+    {
+        "id": 25,
+        "customer_id": "CUST10025",
+        "customer_comment": "Order #ORD50013: Overcharged $40 for a slow cooker ($100). Receipt shows $140. Please refund.",
+        "status": "close",
+        "subject": "Overcharge on Order",
+        "date_received": "2025-06-25",
+        "date_addressed": ""
+    },
+    {
+        "id": 26,
+        "customer_id": "CUST10026",
+        "customer_comment": "Canceled order for a pet bed ($60) before shipping, but charged. Please refund.",
+        "status": "open",
+        "subject": "Refund for Canceled Order",
+        "date_received": "2025-06-26",
+        "date_addressed": ""
+    },
+    {
+        "id": 27,
+        "customer_id": "CUST10027",
+        "customer_comment": "Order #ORD50014: Paid $110 for a fitness tracker. Status shows 'payment pending.' Please update.",
+        "status": "open",
+        "subject": "Payment Pending Issue",
+        "date_received": "2025-06-27",
+        "date_addressed": ""
+    },
+    {
+        "id": 28,
+        "customer_id": "CUST10028",
+        "customer_comment": "$20 discount not applied for a wall clock ($80). Charged full amount. Please refund $20.",
+        "status": "open",
+        "subject": "Discount Code Not Applied",
+        "date_received": "2025-06-28",
+        "date_addressed": ""
+    },
+    {
+        "id": 29,
+        "customer_id": "CUST10029",
+        "customer_comment": "Paid $350 for a drone via Google Pay. Transaction failed, but amount deducted. Please refund.",
+        "status": "open",
+        "subject": "Google Pay Transaction Error",
+        "date_received": "2025-06-29",
+        "date_addressed": ""
+    },
+    {
+        "id": 30,
+        "customer_id": "CUST10030",
+        "customer_comment": "Order #ORD50015: Paid $90 for a camping tent. Bank flagged payment, order not processed. Confirmed as legitimate.",
+        "status": "open",
+        "subject": "Payment Flagged by Bank",
+        "date_received": "2025-06-30",
+        "date_addressed": ""
+    },
+    {
+        "id": 31,
+        "customer_id": "CUST10031",
+        "customer_comment": "Order #ORD50016: Charged twice for a robot vacuum ($400). Please refund one charge.",
+        "status": "open",
+        "subject": "Double Charge Issue",
+        "date_received": "2025-07-01",
+        "date_addressed": ""
+    },
+    {
+        "id": 32,
+        "customer_id": "CUST10032",
+        "customer_comment": "Payment for a smart speaker ($100) declined, but amount deducted. No order placed. Please refund.",
+        "status": "open",
+        "subject": "Payment Deducted but Order Not Placed",
+        "date_received": "2025-07-02",
+        "date_addressed": ""
+    },
+    {
+        "id": 33,
+        "customer_id": "CUST10033",
+        "customer_comment": "Order #ORD50017: Paid $200 for a microwave oven. Payment error, but charge appeared. Please confirm or refund.",
+        "status": "open",
+        "subject": "Payment Gateway Error",
+        "date_received": "2025-07-03",
+        "date_addressed": ""
+    },
+    {
+        "id": 34,
+        "customer_id": "CUST10034",
+        "customer_comment": "Paid $130 for a Bluetooth speaker via PayPal, stuck in 'processing.' Please resolve.",
+        "status": "open",
+        "subject": "PayPal Payment Stuck",
+        "date_received": "2025-07-04",
+        "date_addressed": ""
+    },
+    {
+        "id": 35,
+        "customer_id": "CUST10035",
+        "customer_comment": "Order #ORD50018: Overcharged $60 for an electric kettle ($120). Receipt shows $180. Please refund.",
+        "status": "close",
+        "subject": "Overcharge on Order",
+        "date_received": "2025-07-05",
+        "date_addressed": ""
+    },
+    {
+        "id": 36,
+        "customer_id": "CUST10036",
+        "customer_comment": "Canceled order for a laptop stand ($50) before shipping, but charged. Please refund.",
+        "status": "open",
+        "subject": "Refund for Canceled Order",
+        "date_received": "2025-07-06",
+        "date_addressed": ""
+    },
+    {
+        "id": 37,
+        "customer_id": "CUST10037",
+        "customer_comment": "Order #ORD50019: Paid $150 for a smartwatch. Status shows 'payment pending.' Please update.",
+        "status": "open",
+        "subject": "Payment Pending Issue",
+        "date_received": "2025-07-07",
+        "date_addressed": ""
+    },
+    {
+        "id": 38,
+        "customer_id": "CUST10038",
+        "customer_comment": "$15 discount not applied for a table lamp ($70). Charged full amount. Please refund $15.",
+        "status": "open",
+        "subject": "Discount Code Not Applied",
+        "date_received": "2025-07-08",
+        "date_addressed": ""
+    },
+    {
+        "id": 39,
+        "customer_id": "CUST10039",
+        "customer_comment": "Paid $500 for a mirrorless camera via Apple Pay. Transaction failed, but amount deducted. Please refund.",
+        "status": "open",
+        "subject": "Apple Pay Transaction Error",
+        "date_received": "2025-07-08",
+        "date_addressed": ""
+    },
+    {
+        "id": 40,
+        "customer_id": "CUST10040",
+        "customer_comment": "Order #ORD50020: Paid $80 for a hiking backpack. Bank flagged payment, order not processed. Confirmed as legitimate.",
+        "status": "open",
+        "subject": "Payment Flagged by Bank",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 41,
+        "customer_id": "CUST10041",
+        "customer_comment": "Order #ORD50021: Double charged $250 for a fitness bike. Please refund one charge.",
+        "status": "open",
+        "subject": "Double Charge Issue",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 42,
+        "customer_id": "CUST10042",
+        "customer_comment": "Payment for a wireless charger ($40) declined, but amount deducted. No order placed. Please refund.",
+        "status": "open",
+        "subject": "Payment Deducted but Order Not Placed",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 43,
+        "customer_id": "CUST10043",
+        "customer_comment": "Order #ORD50022: Paid $300 for a patio heater. Payment error, but charge appeared. Please confirm or refund.",
+        "status": "open",
+        "subject": "Payment Gateway Error",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 44,
+        "customer_id": "CUST10044",
+        "customer_comment": "Paid $90 for a smart doorbell via Google Pay, stuck in 'processing.' Please resolve.",
+        "status": "open",
+        "subject": "Google Pay Payment Stuck",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 45,
+        "customer_id": "CUST10045",
+        "customer_comment": "Order #ORD50023: Overcharged $30 for a kitchen scale ($60). Receipt shows $90. Please refund.",
+        "status": "close",
+        "subject": "Overcharge on Order",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 46,
+        "customer_id": "CUST10046",
+        "customer_comment": "Canceled order for a desk chair ($200) before shipping, but charged. Please refund.",
+        "status": "open",
+        "subject": "Refund for Canceled Order",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 47,
+        "customer_id": "CUST10047",
+        "customer_comment": "Order #ORD50024: Paid $110 for a noise-canceling headphone. Status shows 'payment pending.' Please update.",
+        "status": "open",
+        "subject": "Payment Pending Issue",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 48,
+        "customer_id": "CUST10048",
+        "customer_comment": "$10 discount not applied for a water bottle ($50). Charged full amount. Please refund $10.",
+        "status": "open",
+        "subject": "Discount Code Not Applied",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 49,
+        "customer_id": "CUST10049",
+        "customer_comment": "Paid $600 for a gaming console via Apple Pay. Transaction failed, but amount deducted. Please refund.",
+        "status": "open",
+        "subject": "Apple Pay Transaction Error",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    },
+    {
+        "id": 50,
+        "customer_id": "CUST10050",
+        "customer_comment": "Order #ORD50025: Paid $120 for a portable projector. Bank flagged payment, order not processed. Confirmed as legitimate.",
+        "status": "open",
+        "subject": "Payment Flagged by Bank",
+        "date_received": "2025-07-09",
+        "date_addressed": ""
+    }
+]
