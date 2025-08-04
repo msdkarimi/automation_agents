@@ -7,27 +7,14 @@ from agent_memory.controllers.orders_catalog_controllers import get_orders_by_cu
 from agent_memory.controllers.purchase_controllers import get_purchase_by_customer_item_controller
 from agent_memory.controllers.payments_controllers import get_payment_by_customer_order_purchase_controller
 from agent_memory.controllers.sop_catalog_controllers import get_all_sop_catalog_controller
-from state import CaseContextState
+from case_contex_agent.state import CaseContextState
 from langchain_core.messages import AIMessage
 import re
 
-class ReactAIMessage(AIMessage):
-    @property
-    def agent_response(self) -> str:
-        # Remove the <think>...</think> block, return final answer
-        return re.sub(r"<think>.*?</think>", "", self.content, flags=re.DOTALL).strip()
-
-    @property
-    def thought(self) -> str:
-        # Extract <think>...</think> content
-        match = re.search(r"<think>(.*?)</think>", self.content, flags=re.DOTALL)
-        return match.group(1).strip() if match else ""
-    
-
-
+# back\database\agents\case_contex_agent\tools.py
 
 @tool
-def get_ticket_details(ticket_id: int) -> CaseContextState:
+def get_ticket_details(ticket_id: int, ) -> CaseContextState:
     """this function is used to see if any link is created to given ticket_id or not.
     Args:
         ticket_id (int)
@@ -35,60 +22,43 @@ def get_ticket_details(ticket_id: int) -> CaseContextState:
         In case of success, it returns keys related to the state of given link to ticket which is compatible with CaseContextState type.
         In case of failure it provides the reasoning. 
     """
-    # Replace with actual database query
 
-    print('tool is called!!')
     response = get_ticket_link_by_id_controller(ticket_id=ticket_id)
     if isinstance(response, int):
-        if response >= 0:
-            return {'used_tools_results': {'status': 'error', 'tool_output': {'id':response}}}
+        if response > 0:
+        #    'there is not any link associated to ticket_id={ticket_id}
+
+            response = insert_new_ticket_linke_controller(ticket_id=ticket_id)
+
+            if response == 0:
+                return {'used_tools_results': {'status': 'success', 'tool_output': f'link for the ticket_id={ticket_id} is created' }}
+            else:
+                return {'used_tools_results': {'status': 'error'}}
+
+
+
         else:
-            return {'used_tools_results': {'status': 'error'}}
+            return 'there is problemt with connection to database, please check the database connection.'
+
     else:
         _content = {'ticket_id':response.ticket_id,
-                    'sop_id':response.sop_id,
-                    'purchase_id':response.purchase_id,
-                    'order_id':response.order_id,
-                    'payment_id':response.payment_id,
-                    'link_id': response.id
+                    'link_id': response.id,
+                    'sop_id': response.sop_id,
+                    'purchase_id': response.purchase_id, 
+                    'order_id': response.order_id,
+                    'payment_id': response.payment_id
                     }
+
         return {'used_tools_results': {'status': 'success', 'tool_output': _content }}
 
-@tool
-def create_link_for_ticket(ticket_id: int, verbose=False) -> dict:
-    """
-    Inserts a new row into the link table for the given `ticket_id`, if it does not already exist.
-
-    This function checks whether the specified `ticket_id` is present in the link table.
-    If it is not found, a new entry is inserted to establish the necessary link.
-    """
-
-    if verbose:
-        print('create_link_for_ticket tool is called!')
-
-    response = insert_new_ticket_linke_controller(ticket_id=ticket_id)
-
-    if response == 0:
-        return {'used_tools_results': {'status': 'success', 'tool_output': f'link for the ticket_id={ticket_id} is inserted' }}
-    else:
-        return {'used_tools_results': {'status': 'error'}}
 
 @tool
-def get_customer_orders(customer_id:str):
-    """this tool helps to find list of all orders of a given customer, based on this you can get more details of the order. below is an example of retrieved item from database:
-    [
-    order_id = Column(String, unique=True, nullable=False)
-    customer_id = Column(String,ForeignKey("customers.customer_id"), nullable=True)
-    purchase_id = Column(String, ForeignKey("purchases.purchase_id"), nullable=True)
-    purchased_item_id = Column(String, ForeignKey("items.item_id"), nullable=True)
-    order_number = Column(String, nullable=True)
-    order_status = Column(String, nullable=False)
-    order_date = Column(String, nullable=False)
-    item_price = Column(Integer, nullable=False)
-    ...]
-
-    if you need the information related to order, 
+def get_customer_all_orders(customer_id: str):
     """
+    this tool is used to just give order history of given customer, this helps us to better understand which order is related to customer comment. 
+    """
+    print('called for customer=', customer_id)
+
     respons = get_orders_by_customer_id_controller(customer_id)
 
     if isinstance(respons, int):
@@ -100,21 +70,22 @@ def get_customer_orders(customer_id:str):
     for order in respons:
         tmp = order.item.model_dump()
         tmp.pop('id', None)
-        _ordered_items.update( {order.order_id :tmp })
+        _ordered_items.update( {f'the order_id={order.order_id} and order_number={order.order_number} for item:' :tmp })
         # _ordered_items += f'ordered item id is {order.item.item_id}, ordered item name is: {order.item.item_name},and its description is {order.item.item_description}\n'
 
-    print('orders are', _ordered_items)
 
     return {'used_tools_results': {'status': 'success', 'tool_output': {'list_of_ordered_items':_ordered_items }}}
-
+    
 @tool
-def set_ordered_item_based_on_item_id(item_info:dict):
-    """    
-        If item_info is available in the context and is not None, the agent should utilize the values from this dictionary.
-        item_info is a dictionary containing information related to a purchased or ordered item.
+def update_item_state(item_id, item_info: dict):
     """
-    item_id = item_info.pop('item_id', None)
-    return {'used_tools_results': {'status': 'success', 'tool_output': 
+    Identifies and updates the relevant item from the user's order history based on references in their comment.
+
+    This tool analyzes the user's comment to extract item-related cues (such as item name or description),
+    matches them against the user's list of past orders, and selects the most relevant item.
+    """
+    item_info.pop('item_id', None)
+    return {'used_tools_results': {'status': 'success', 'tool_output':
                                    {'item_id': item_id, 'order': item_info}}}
 
 @tool
@@ -124,6 +95,9 @@ def get_purchase_by_customerId_itemId(customer_id:str, item_id:str):
     It should be used when both `customer_id` and `item_id` are available. Upon execution, 
     it will update the `purchase_id` and associated purchase details in the state.
     """
+
+
+
     purchase = get_purchase_by_customer_item_controller(customer_id=customer_id, item_id=item_id)
 
     if isinstance(purchase, int):
@@ -152,14 +126,13 @@ def get_purchase_by_customerId_itemId(customer_id:str, item_id:str):
 @tool
 def get_payment_by_customer_order_purchase(customer_id:str, order_id:str, purchase_id:str):
     """
-    This tool retrieves information related to a payment.
+    Retrieves detailed payment information for a specific purchase within a customer's order.
 
-    It should be used when payment details are needed in the workflow. To use this tool, 
-    the following identifiers are required:
-    - `customer_id`
-    - `order_id`
-    - `purchase_id`
+    Use this tool to find details about a transaction, such as payment status,
+    amount, method, or transaction ID. This is particularly useful for
+    addressing customer inquiries about charges, refunds, or payment confirmation.
     """
+
     payment = get_payment_by_customer_order_purchase_controller(customer_id=customer_id, order_id=order_id, purchase_id=purchase_id)
 
     if isinstance(payment, int):
@@ -185,28 +158,21 @@ def get_payment_by_customer_order_purchase(customer_id:str, order_id:str, purcha
             }
     return {'used_tools_results': {'status': 'success', 'tool_output': _content }}  
 
-@tool     
+@tool
 def get_list_of_sop_catalogs():
     """
-    Retrieves all Standard Operating Procedures (SOPs) available in the system.
+    Retrieves the complete list of available Standard Operating Procedures (SOPs).
 
-    This function is intended to fetch and return information related to all SOPs.
-    It does not perform any filtering or selection.
-
-    Later in the workflow, based on user input or comments, a specific SOP from 
-    this list may be selected and linked to a ticket.
-
-    Returns:
-        dictionary : A dictionary of all available SOPs, each containing relevant metadata.
-        e.g, "sop_id":"sop_title"
+    Use this tool to get a full catalog of SOPs. The output can be used to
+    identify and link a specific SOP to a customer issue or ticket based on
+    the customer's request or details.
     """
-
     sops = get_all_sop_catalog_controller()
     
     _content = dict()
 
     for sop in sops:
-        _content.update({"sopid": sop.sopid, "title": sop.title})
+        _content.update({sop.sopid:{"title": sop.title}})
 
     return {'used_tools_results': {'status': 'success', 'tool_output': {'list_of_sops' :_content }}}  
 
@@ -214,22 +180,51 @@ def get_list_of_sop_catalogs():
 @tool
 def update_sop_state(sop_id, sop_tile):
     """
-    Updates the ticket state with information about Standard Operating Procedures (SOPs) .
-    This function should be called only when the 'list_of_sop' field 
-    exists. sop_id and sop_tile are extracted from 
-    the list and are used to update the current state of the agent).
+    Selects and sets the current Standard Operating Procedure (SOP) for the conversation.
+
+    This tool identifies the most relevant SOP from a list and updates the agent's
+    state with its ID and title. It is crucial for focusing the conversation
+    on the correct procedure to follow based on the customer's input.
     """
 
     return {'used_tools_results': {'status': 'success', 'tool_output': 
                                 {'sop_id': sop_id, 'sop': {'title': sop_tile}}}}
 
+@tool
+def get_customer_orders(state: CaseContextState):
+    """
+    Retrieves a list of all orders for a specific customer.
+
+    This tool is used to get a complete history of a customer's purchases.
+    It returns a list of order records, each containing key details like order ID,
+    status, date, and price. This information is a prerequisite for a more
+    detailed analysis of individual orders.
+    """
+
+    respons = get_orders_by_customer_id_controller(state.customer_id)
+
+    if isinstance(respons, int):
+        return {'used_tools_results': {'status': 'error'}}
+    elif isinstance(respons, list) and len(respons)==0:
+        return {'used_tools_results': {'status': 'success', 'tool_output': f'there is not any order associated to customer {customer_id}.'}}
+    
+    _ordered_items = dict()
+    for order in respons:
+        tmp = order.item.model_dump()
+        tmp.pop('id', None)
+        _ordered_items.update( {order.order_id :tmp })
+        # _ordered_items += f'ordered item id is {order.item.item_id}, ordered item name is: {order.item.item_name},and its description is {order.item.item_description}\n'
+
+
+    # return {'list_of_ordered_items': _ordered_items}
+
+    return {'used_tools_results': {'status': 'success', 'tool_output': {'list_of_ordered_items': _ordered_items }}}  
+
 
 def get_all_tools():
     return[
-        get_ticket_details,
-        create_link_for_ticket,
-        get_customer_orders,
-        set_ordered_item_based_on_item_id,
+        get_customer_all_orders,
+        update_item_state,
         get_purchase_by_customerId_itemId,
         get_payment_by_customer_order_purchase,
         get_list_of_sop_catalogs,

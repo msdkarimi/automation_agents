@@ -38,7 +38,7 @@ def insert_new_sop_catalog_controller(sop_cat, verbose=False) -> int:
         return 2
     
 
-def get_all_sop_catalog_controller(verbose=True):
+def get_all_sop_catalog_controller(verbose=False):
     """
     Returns all rows from the Ticket table.
     """

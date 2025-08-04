@@ -20,7 +20,7 @@ def insert_new_ticket_controller(ticket, verbose=True) -> int:
     # print(_get_credentilas())
     try:
         with DBCore(*_get_credentilas()) as db:
-            new_purchase = Ticket(**ticket.dict())  # Use the imported model
+            new_purchase = Ticket(**ticket)  # Use the imported model
             db.session.add(new_purchase)
 
         if verbose:

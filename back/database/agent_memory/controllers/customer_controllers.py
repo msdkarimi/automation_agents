@@ -22,7 +22,7 @@ def insert_customer_controller(customer, verbose=False) -> int:
     # print(_get_credentilas())
     try:
         with DBCore(*_get_credentilas()) as db:
-            new_customer = Customer(**customer.dict())  # Use the imported model
+            new_customer = Customer(**customer)  # Use the imported model
             db.session.add(new_customer)
 
         if verbose:

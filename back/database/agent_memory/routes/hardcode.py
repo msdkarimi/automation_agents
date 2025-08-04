@@ -299,7 +299,7 @@ sop_catalog = [
         "sopid": "SOP011",
         "title": "Google Pay Payment Stuck Resolution",
         "description": (
-            "This procedure fixes Google Pay payments stuck in 'processing' status, delaying order completion (e.g., ticket 14: CUST10014 paid $120 for AirPods Pro, purchase_id PURC00014).\n\n"
+            "This procedure fixes Google Pay payments stuck in 'processing' status, delaying order completion.\n\n"
             "**Stage 1: Verify Google Pay Transaction Status**\n"
             "- **Log in** to the Google Pay business account and locate the transaction using the **customer_id** (e.g., CUST10014) or **purchase_id** (e.g., PURC00014).\n"
             "- **Check** the transaction status (e.g., 'pending') and identify any holds or errors.\n"
@@ -947,19 +947,25 @@ from models import PaymentSchema
 from typing import List
 
 
+# for i in items:
+#     insert_new_item_controller(i)
+
+# for i in customers:
+#     insert_customer_controller(i)
+
+# for i in tickets:
+#     insert_new_ticket_controller(i)
+
+
+# for i in purchases:
+#     insert_new_purchase_controller(i)
+
+
 # for i in orders:
+#     insert_new_order_controller(i)
+
+# for i in payments:
 #     insert_new_payment_controller(i)
 
-
-print(get_ticket_link_by_id_controller(1))
-
-
-# sop_cats_bp = APIRouter(prefix="/sop_cats", tags=["sop_cats"])
-
-
-# @sop_cats_bp.get("/", response_model=List[OrdersSchema])
-# def get_all_tickets(req:Request, res:Response):
-#     result = get_all_sop_catalog_controller()
-#     return result
-
-
+# for i in sop_catalog:
+#     insert_new_sop_catalog_controller(i)

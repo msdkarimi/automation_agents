@@ -6,6 +6,9 @@ flask-cors
 fastapi
 uvicorn
 
+redis
+aioredis
+
 langchain-ollama
 langgraph
 langchain

@@ -20,7 +20,7 @@ def insert_new_purchase_controller(purchase, verbose=True) -> int:
     # print(_get_credentilas())
     try:
         with DBCore(*_get_credentilas()) as db:
-            new_purchase = Purchase(**purchase.dict())  # Use the imported model
+            new_purchase = Purchase(**purchase)  # Use the imported model
             db.session.add(new_purchase)
 
         if verbose:

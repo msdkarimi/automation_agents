@@ -20,7 +20,7 @@ def insert_new_item_controller(item, verbose=False) -> int:
     # print(_get_credentilas())
     try:
         with DBCore(*_get_credentilas()) as db:
-            new_item = Item(**item.dict())  # Use the imported model
+            new_item = Item(**item)  # Use the imported model
             db.session.add(new_item)
 
         if verbose:

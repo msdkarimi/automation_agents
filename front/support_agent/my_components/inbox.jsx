@@ -2,7 +2,7 @@ import { Blockquote, Center, Box, ScrollArea, Loader} from '@mantine/core';
 import { IconMailbox } from '@tabler/icons-react';
 import { MyTable } from './tabels/inbox_table';
 import { useDisclosure } from '@mantine/hooks';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export function Inbox(props) {
 
@@ -10,6 +10,10 @@ export function Inbox(props) {
 
   const [selectedRow, setSelectedRow] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const [modal2Opened, setModal2Opened] = useState(false);
+  const eventSourceRef = useRef(null);
+
+
 
 
   // useEffect(()=>{
@@ -32,7 +36,8 @@ export function Inbox(props) {
         <Center  bg="var(--mantine-color-gray-light)" >
         {
           props.tickets.length!=0 ?
-          <MyTable agent_response={props.agent_response} elements={props.tickets} selection={selectedRow} setSelection={setSelectedRow} opened={opened} open={open} close={close}/>
+          <MyTable agent_response={props.agent_response} elements={props.tickets} selection={selectedRow} setSelection={setSelectedRow} 
+          opened={opened} open={open} close={close} modal2Opened={modal2Opened} setModal2Opened={setModal2Opened} eventSourceRef={eventSourceRef}/>
           :
           <Loader size={50} /> 
         }

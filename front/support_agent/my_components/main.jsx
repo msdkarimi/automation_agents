@@ -19,6 +19,7 @@ import { Item, Purchase, Ticket } from '../custom_types/models';
 
 
 export function Menu() {
+  
   const [activeTab, setActiveTab] = useState('home');
   const [agentResponse, setAgentResponse] = useState();
   const [tickets, setTickets] = useState([]);
@@ -32,6 +33,7 @@ export function Menu() {
   }
 
   async function get_all_tickets (){
+    // console.log('msdfff')
     const res = await get_all_tickets_api()
     return res
   }
@@ -86,11 +88,14 @@ export function Menu() {
   }, [activeTab]);
 
   useEffect(() => {
-
+// console.log('setting all tickets0000.')
     get_all_tickets().then(
       (res)=>{
         setTickets(res)
-      })
+      })    
+      .catch((error) => {
+      console.log('Failed to fetch tickets:', error)
+    })
 
       get_all_sop_cats().then(
       (res)=>{

@@ -125,32 +125,13 @@ class TicketLink(Base):
     sop_id = Column(String, ForeignKey("sopcatalogs.sopid"), nullable=True)
 
     ticket = relationship("Ticket", back_populates="ticket_links")
-    # ticket = relationship("Ticket")
-    
-
-
-
-# ItemSchema = sqlalchemy_to_pydantic(Item)  # for reading items UserRead
-# ItemSchema = None
-# ItemCreateSchema = sqlalchemy_to_pydantic(Item, exclude=["id"])  # for createing item
-# ItemCreateSchema = None
-
-# PurchaseSchema = sqlalchemy_to_pydantic(Purchase) 
-# PurchaseCreateSchema = sqlalchemy_to_pydantic(Purchase, exclude=["id"]) 
-
-# TicketSchema = sqlalchemy_to_pydantic(Ticket)
-# TicketCreateSchema = sqlalchemy_to_pydantic(Ticket, exclude=["id"]) 
-
-
 
 class ItemSchema(BaseModel):
     id:int
     item_id: str
     item_name: str
     item_description: str
-
-    # payment: Optional['PaymentSchema'] = None
-
+    
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -233,7 +214,7 @@ class PaymentSchema(BaseModel):
     payment_method: str
     payment_date: str
 
-        # Relationships
+    # Relationships
     customer: Optional[CustomerSchema] = None
     item: Optional[OrdersSchema] = None
     purchase: Optional[PurchaseSchema] = None
@@ -246,7 +227,6 @@ class TicketLinkSchema(BaseModel):
     id: int
     ticket_id:int 
 
-    # One of the following will be filled
     purchase_id:  Optional[str] = None
     order_id:  Optional[str] = None
     payment_id:  Optional[str] = None
@@ -271,8 +251,12 @@ class TicketSchema(BaseModel):
     date_received: str
     date_addressed: str
 
-  
-    # ticket_links: Optional[List[TicketLinkSchema]] = []
     ticket_links: Optional[TicketLinkSchema] = None
     
     model_config = ConfigDict(from_attributes=True)
+
+
+class IgniteCaseContextAgentSchema(BaseModel):
+    ticket_id: int
+    customer_id: str
+    customer_comment: str

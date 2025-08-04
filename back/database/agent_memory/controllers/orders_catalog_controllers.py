@@ -22,7 +22,7 @@ def insert_new_order_controller(order, verbose=False) -> int:
     # print(_get_credentilas())
     try:
         with DBCore(*_get_credentilas()) as db:
-            new_item = Orders(**order.dict())  # Use the imported model
+            new_item = Orders(**order)  # Use the imported model
             db.session.add(new_item)
 
         if verbose:
@@ -70,7 +70,7 @@ def get_orders_by_customer_id_controller(customer_id: str, verbose=False):
             pydantic_orders = [OrdersSchema.from_orm(ticket) for ticket in tickets]
         
         if verbose:
-            print(f"Retrieved {len(tickets)} tickets for customer_id = {customer_id}")
+            print(f"Retrieved {len(pydantic_orders)} tickets for customer_id = {customer_id}")
 
         return pydantic_orders
 

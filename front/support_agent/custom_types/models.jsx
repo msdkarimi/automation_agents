@@ -31,3 +31,14 @@ export class Ticket {
         this.date_addressed = date_addressed
     }
 }
+
+export class AgentActions {
+    constructor(the_id, is_start, is_end, think=[], chat=[], tool=[]) {
+        this.the_id = the_id
+        this.is_start = is_start
+        this.is_end = is_end
+        this.think = think
+        this.chat = chat
+        this.tool = tool
+    }
+}

@@ -12,13 +12,13 @@ class DBCore:
         self.verbose = verbose
 
     def __enter__(self):
-        print('opened')
+        # print('opened')
         Base.metadata.create_all(self.engine)  # creates tables for all models on this Base
         self.session = self.Session()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print('closed')
+        # print('closed')
         if exc_val is not None:
             self.session.rollback()
         else:

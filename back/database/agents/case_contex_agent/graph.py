@@ -3,14 +3,17 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from langgraph.graph import StateGraph, START, END
 from base_agent import BaseAgent
-from state import CaseContextState
+from case_contex_agent.state import CaseContextState
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from tools import get_all_tools
+from langchain_core.messages.ai import AIMessageChunk
+from case_contex_agent.tools import get_all_tools
 from langchain_ollama.chat_models import ChatOllama
-from nodes import agent_node, check_agent_action, tool_calling_node
+from case_contex_agent.nodes import agent_node, check_agent_action, tool_calling_node, get_ticket_details_node
 from functools import partial
 from langgraph.checkpoint.memory import InMemorySaver
 from collections import defaultdict
+
+# back\database\agents\case_contex_agent
 
 class CaseContectGraph(BaseAgent):
     def __init__(self, 
@@ -29,26 +32,6 @@ class CaseContectGraph(BaseAgent):
         self.all_nodes = dict()
         self.all_edges = dict()
         self.conditional_edges = dict()
-
-        self.tmp = f"""
-                  You are a helpful and empathetic customer service agent. Your goal is to resolve customer issues efficiently.
-
-                    You have access to the following tools:
-                    <tools>
-                    {self.tools}
-                    </tools>
-
-                    To solve the user's request, you must use the following thinking process and format. You will be in a loop of Thought, Action, Action Input, and Observation.
-
-                    1.  **Thought:** First, think step-by-step about the user's request. Break down the problem. Analyze the information you have and what you need. Decide if you need to use a tool and which one is most appropriate. This is your Chain of Thought.
-                    2.  **Action:** The name of the tool you have decided to use. This must be one of the tools listed above: [{self.tools}].
-                    3.  **Action Input:** The JSON input for the selected tool, matching its schema.
-                    4.  **Observation:** After you provide an action, the system will execute it and give you back an observation.
-
-                    If you have gathered enough information to provide a final answer to the user, you must use the special action `Finish` with the key "answer" in the `action_input`.
-
-                    Let's begin.
-                        """
 
 
     def add_new_node(self, node_name, the_node):
@@ -82,28 +65,56 @@ class CaseContectGraph(BaseAgent):
     
     
     
-    def invoke_agent(self):
-        res = agent.graph.invoke({'customer_comment': "Payment for a Dyson V15 vacuum ($700) was declined, but the amount was deducted. No order confirmation received. Please refund or process.",
-                                  'ticket_id': 1,
-                                  'customer_id': 'CUST10002',
-                                  'messages': [
-                                      
-                                    # AIMessage(self.tmp)
-                                      SystemMessage(f"""You are a careful and helpful assistant responsible for handling user support tickets. Your role is to assist in resolving ticket-related issues by analyzing the provided case context and using the available tools effectively.
-                                                                You act as a **case context agent** in a ticketing system. Use the provided context to understand the situation and determine what actions are needed.
-                                                                Your goals:
-                                                                - Carefully analyze the available context and customer comment.
-                                                                - Clearly state what decisions you make and **why** you made them.
-                                                                - If additional information is needed, use the correct tools and explain the purpose of each tool call.
-                                                                - Be concise, accurate, and professional.
-
-                                                                Always base your decisions on the data in the context. Do not ask for information that is already provided.
-                                                                """)
-
-
-
-                                                ]}, self.thread_config)
+    def invoke_agent(self, ticket_id, customer_id, customer_comment):
+        res = self.graph.invoke({'customer_comment': customer_comment,
+                                  'ticket_id': ticket_id,
+                                  'customer_id': customer_id }, self.thread_config)
         print(res)
+
+    def stream_agent(self, prompt):
+        for event in self.graph.stream(prompt, stream_mode=["updates", 'messages'], config=self.thread_config):
+            update, message = event
+            if isinstance(message, dict):
+                print(message)
+
+            elif isinstance(message[0], AIMessageChunk):
+                print(message[0].content, end="", flush=True)
+            
+    async def astream_agent(self, prompt):
+        yield {"type":"agent", "phase":"start", "id":"1234"}
+        _is_think = False
+        async for event in self.graph.astream_events(prompt, version="v1", config=self.thread_config):
+            if event['event'] == 'on_chain_start' and event['name'] == 'agent_node':
+                if event['data']:
+                    yield {"type":"loop", "phase":"react", "id":event["run_id"]}
+
+            kind = event["event"]
+        
+            if kind == "on_chat_model_stream":
+                chunk = event["data"]["chunk"]
+                if chunk.content:
+                    if chunk.content == '<think>':
+                        _is_think = True
+                        continue
+                    elif chunk.content == '</think>':
+                        _is_think = False
+                        continue
+                    if _is_think:
+                        yield {"type":"chat", "content":str(chunk.content), "think":True, "phase":"generation", "id":event["run_id"]}
+                        
+                    else:
+                        yield {"type":"chat", "content":str(chunk.content), "think":False, "phase":"generation", "id":event["run_id"]}
+                        
+                    
+            if kind == "on_tool_start":
+                yield {"type":"tool", "name":event["name"], "args":event["data"].get("input"), "phase":"start", "id":event["run_id"]}
+                 
+            # if kind == "on_tool_end":
+            #     yield {"type":"tool", "name":event["name"], "phase":"finish", "id":event["run_id"]}
+                
+        
+        yield {"type":"agent", "phase":"finish", "id":"6789"}
+        
 
     def save_state(self):
         pass
@@ -117,25 +128,35 @@ class CaseContectGraph(BaseAgent):
         with open("graph.png", "wb") as f:
             f.write(png_data)
 
+async def producer(ticket_id, customer_id, customer_comment):
+
+    agent = CaseContectGraph(model='qwen3:32b', tools=get_all_tools())
+    
+    agent.add_new_node("get_history", get_ticket_details_node)
+
+    agent.add_new_node("agent_node", partial(agent_node, agent))
+    agent.add_new_node("tool_node",  partial(tool_calling_node, agent))
+
+    agent.add_new_edge(START, "get_history")
+    agent.add_new_edge("get_history", "agent_node")
+    agent.add_new_edge('tool_node', "agent_node")
+
+    agent.add_new_conditional_edge('agent_node', check_agent_action, {'tool':'tool_node', 'final':END})
+
+    agent._build_graph()
+
     
     
-        
+    async for _s in agent.astream_agent({'ticket_id':ticket_id, 'customer_id':customer_id, 'customer_comment':customer_comment, }):
+        # print(_i, end='', flush=True)
+        yield _s
 
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(
+        producer(1,
+                'CUST10001',
+                "Order #ORD50001: Charged twice for a 55-inch Samsung 4K TV ($600). Total shows $1200 on my card. Please refund one charge."
+    )
+    )
 
-agent = CaseContectGraph(model='qwen3:8b', tools=get_all_tools())
-# agent = CaseContectGraph(tools=get_all_tools())
-
-
-agent.add_new_node("entry_point", partial(agent_node, agent))
-agent.add_new_node("tool_node",  partial(tool_calling_node, agent))
-
-agent.add_new_edge(START, "entry_point")
-agent.add_new_edge('tool_node', "entry_point")
-
-
-
-agent.add_new_conditional_edge('entry_point', check_agent_action, {'tool':'tool_node', 'final':END})
-
-agent._build_graph()
-
-agent.invoke_agent()
