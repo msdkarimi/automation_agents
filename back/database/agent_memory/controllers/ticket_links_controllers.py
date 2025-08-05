@@ -45,14 +45,47 @@ def insert_new_ticket_linke_controller(ticket_id, verbose=True) -> int:
         return -2
 
 
-async def get_ticket_link_by_id_controller(ticket_id, verbose=False):
+
+def update_ticket_link_controller(ticket_id: int, sop_id: str = None, purchase_id: str = None, order_id: str = None, payment_id: str = None, verbose=True) -> int:
+    try:
+        with DBCore(*_get_credentilas()) as db:
+            # Query the existing ticket link
+            ticket_link = db.session.query(TicketLink).filter_by(ticket_id=ticket_id).first()
+
+            if not ticket_link:
+                print(f"No ticket link found with ticket_id={ticket_id}")
+                return -3
+
+            if sop_id is not None:
+                ticket_link.sop_id = sop_id
+            if purchase_id is not None:
+                ticket_link.purchase_id = purchase_id
+            if order_id is not None:
+                ticket_link.order_id = order_id
+            if payment_id is not None:
+                ticket_link.payment_id = payment_id
+
+            if verbose:
+                print(f"Ticket link for ticket_id={ticket_id} has been updated.")
+
+            return 0
+
+    except OperationalError as e:
+        print('There is a problem with establishing a connection to the DB. Check credentials/db_name!', str(e))
+        return -1
+    except Exception as e:
+        print(f"A generic exception occurred during the update of ticket link for ticket_id={ticket_id}", e)
+        return -2
+
+
+
+async def get_ticket_link_by_id_controller(ticket_id, verbose=True):
     """
     Return link to ticket by id
     """
-    print('jeff', ticket_id)
     try:
         with DBCore(*_get_credentilas()) as db:
-            ticket = db.session.query(TicketLink).filter_by(id=ticket_id).first()
+            ticket = db.session.query(TicketLink).filter_by(ticket_id=ticket_id).first()
             if not ticket:
                 if verbose:
                     print(f"there is no link to ticket with id={ticket_id}")

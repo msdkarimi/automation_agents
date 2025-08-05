@@ -18,37 +18,64 @@ from agent_memory.controllers.orders_catalog_controllers import get_orders_by_cu
 async def agent_node(graph, state:CaseContextState)-> CaseContextState:
     
 
-    _prompt_template_ = f"""
-                            Here is the current context and available variables:
+    _prompt_template_  = f"""
+        **Agent Execution Context**
 
-                            - order_id: {state.order_id}
-                            - payment_id: {state.payment_id}
-                            - sop_id: {state.sop_id}
-                            - purchase_id: {state.purchase_id}
-                            - ticket_id: {state.ticket_id}
-                            - customer_comment: {state.customer_comment}
-                            - customer_id: {state.customer_id}
+        **1. Current State Variables:**
+        Review the following variables to understand what information is currently available. A `None` value indicates the ID has not been found yet.
 
-                            always look at the convesation input to better understand which tools has been called to so far.
-                            consider that a customer migh have multiple orders, based on this and the customer comment, you have to identify the correct order.
+        - ticket_id: {state.ticket_id}
+        - customer_id: {state.customer_id}
+        - customer_comment: {state.customer_comment}
+        - order_id: {state.order_id}
+        - item_id: {state.item_id}
+        - purchase_id: {state.purchase_id}
+        - payment_id: {state.payment_id}
+        - sop_id: {state.sop_id}
 
-                        """
+        **2. Core Directives:**
 
+        - **Analyze Conversation History:** Always examine the prior steps in the conversation to understand which tools have already been called and what their outputs were. Avoid redundant actions.
+
+        - **Identify the Correct Order:** Customers may have multiple orders. You must use the `customer_comment` to accurately identify the specific order the customer is referring to before using tools that require an `order_id` or `item_id`.
+        """
 
     instruction_template = f"""
-    You are a supportive assistant for resolving customer service tickets related to specific order. 
-    Your main goal is to accurately diagnose the customer's issue and attach all relevant information to the ticket.
+    You are an intelligent assistant for processing customer service tickets.
+    Your main goal is to accurately diagnose the customer's issue and link all relevant information (such as orders, purchases, payments, and procedural documents) to the support ticket.
 
-    To do this, you must:
+    Your task is to analyze the customer's comment and decide which tools to use to gather the necessary IDs. Your process will conclude with a final call to the `update_linked_information_database` tool to save your findings.
 
-    - **Analyze the customer's comment** to identify key details.
-    - **Use your tools** to find any missing information based on current context and available variables.
-    - **Link all relevant data** to the ticket.
+    **Your Guiding Objective:**
+    Work towards gathering all the necessary arguments (`ticket_id`, `sop_id`, `purchase_id`, `order_id`, `payment_id`) to make a successful final call to `update_linked_information_database`.
 
-    Always prioritize efficiency. Only use tools when it's absolutely necessary to gather information that isn't already available from previous steps or tool outputs.
-    Avoid unnecessary tool calls to streamline the process.
+    **Tool Reference & Strategy:**
+
+    * **To Investigate Orders:**
+        - If the customer's comment is vague about which order they're referring to, use `get_customer_all_orders` to see their full purchase history.
+        - After you identify the correct item from the list, use `update_item_state` to confirm your choice. This is important as it makes the `order_id` and `item_id` available for other tools.
+
+    * **To Get Transaction Details:**
+        - To find the `purchase_id` for an item, use `get_purchase_by_customerId_itemId`.
+        - If the issue is about a charge, refund, or payment status, use `get_payment_by_customer_order_purchase` to get the `payment_id`.
+
+    * **To Find the Correct Procedure:**
+        - To understand the available solutions, use `get_list_of_sop_catalogs` to see all Standard Operating Procedures (SOPs).
+        - Once you've matched the customer's problem to a procedure, use `update_sop_state` to select it and get the `sop_id`.
+
+    * **To Complete the Task:**
+        - The **final step** is always to call `update_linked_information_database`. Use this tool only when you have gathered all relevant IDs based on the nature of the customer's issue.
+        - give a concise output about your actions and available information.
+    
+    
+    1.  **Provide Summary:** After the database is updated, present a concise, user-friendly summary of the findings and actions taken. For example: "I've identified the issue with order #12345 regarding a refund. I have linked the corresponding payment and purchase IDs to the ticket and flagged it for the 'Defective Item Return' procedure. The finance team will now process the refund."
+    2.  **End Process:** Conclude your work by outputting `**END**`.
+
+    **Core Principles:**
+    - **Autonomy:** You decide the best sequence of tool calling based on the customer's message and the state of the context.
+    - **Efficiency:** Do not call a tool if you already have the information. For example, if a `purchase_id` is already set, there is no need to use tools to find it.
+    - **Dependencies:** Be aware that some tools require information from others (e.g., you need an `item_id` to get a `purchase_id`). Plan your tool calls accordingly.
     """
-
     messages = [SystemMessage(instruction_template)]
 
     if len(state.used_tools_results):
@@ -61,10 +88,15 @@ async def agent_node(graph, state:CaseContextState)-> CaseContextState:
 
     messages += [HumanMessage(_prompt_template_)]
 
+    if state.last_routing == 'loop':
+        messages += state.messages[-1:]
+
     response = graph.llm_with_tools.astream(messages, graph.thread_config)
 
     _tool_call_chunks = list()
     _final_response = None
+
+    _think = False
 
     async for chunk in response:
         # print(chunk)
@@ -74,28 +106,55 @@ async def agent_node(graph, state:CaseContextState)-> CaseContextState:
 
         if isinstance(chunk, AIMessageChunk):
 
-            if _final_response is None:
-                _final_response = chunk
-            else:
-                _final_response += chunk
+            # if _final_response is None:
+            #     _final_response = chunk
+            # else:
+            #     _final_response += chunk
 
             yield {'stream_messages': chunk}
+            if '<think>' in chunk.content or _think:
+                _think = True
+            if '</think>' in chunk.content or _think:
+                _think = False
+            if not _think and '</think>' not in chunk.content:
+                
+                if _final_response is None:
+                    _final_response = chunk.content
+                else:
+                    _final_response += chunk.content
+
+    if _final_response is not None:
+        yield {'messages': AIMessage(content=_final_response)}
     
     if len(_tool_call_chunks):
         _calls = []
         for tool_call in _tool_call_chunks:
             _calls.append([ToolCall(**tool_call)])
-        yield  {'used_tools': _calls,}
+        yield  {'used_tools': _calls, 'last_routing': 'tool'}
     else:
-        pass
-        # yield  {'messages': [AIMessage(_final_response)]}
+        if "END" in _final_response:
+            yield {'last_routing': 'END'}
+        else:
+            yield  {'messages': [AIMessage(_final_response)], 'last_routing': 'loop'}
 
 async def check_agent_action(state):
-    
-    if len(state.used_tools) != len(state.used_tools_results):
+
+    print('negin', state.messages[-1:])
+    print('negin', state.messages)
+
+    if state.last_routing == 'tool':
         return 'tool'
+    elif state.last_routing == 'loop':
+        return 'loop'
     else:
         return 'final'
+    
+    # if len(state.used_tools) != len(state.used_tools_results):
+    #     return 'tool'
+    # elif 'END' not in state.messages[-1].content:
+    #     return 'loop'
+    # else:
+    #     return 'final'
 
     
 async def tool_calling_node(graph, state:CaseContextState):
@@ -120,17 +179,18 @@ async def tool_calling_node(graph, state:CaseContextState):
                         result = await tool.ainvoke(tool_args)  # for async
                     else:
                         result = tool(**tool_args)  # Fallback for raw functions
-                    
-                    if isinstance(result['used_tools_results']['tool_output'], dict):
-                        return_values.update(result['used_tools_results']['tool_output'])
+                    if result.get('used_tools_results', None) and result['used_tools_results'].get('tool_output', None):
+                        if isinstance(result['used_tools_results']['tool_output'], dict):
+                            return_values.update(result['used_tools_results']['tool_output'])
 
-                    tool_results.append(ToolMessage(
-                        content=str(result['used_tools_results']['tool_output']),
-                        tool_call_id=str(tool_call_id),
-                        name=tool_name,
-                        status=str(result['used_tools_results']['status']),
-                        type="tool",
-                    ))
+
+                        tool_results.append(ToolMessage(
+                            content=str(result['used_tools_results']['tool_output']),
+                            tool_call_id=str(tool_call_id),
+                            name=tool_name,
+                            status=str(result['used_tools_results']['status']),
+                            type="tool",
+                        ))
 
                 except Exception as e:
                     print('in exception')
@@ -155,20 +215,21 @@ async def get_ticket_details_node(state: CaseContextState) -> dict:
         In case of success, it returns keys related to the state of given link to ticket which is compatible with CaseContextState type.
         In case of failure it provides the reasoning. 
     """
+    print('lastt', state.ticket_id)
     
     response = await get_ticket_link_by_id_controller(ticket_id=state.ticket_id)
     
     if isinstance(response, int):
-        if response > 0:
-            response = insert_new_ticket_linke_controller(ticket_id=state.ticket_id)
+        if response >= 0:
+            _response = insert_new_ticket_linke_controller(ticket_id=state.ticket_id)
 
-            if response == 0:
-                yield {'used_tools_results': {'status': 'success', 'tool_output': f'link for the ticket_id={state.ticket_id} is created' }}
+            if _response == 0:
+                yield {'status': 'success' }
             else:
-                yield {'used_tools_results': {'status': 'error'}}
+                yield {'status': 'error'}
 
         else:
-            yield {'used_tools_results': {'status': 'there is problemt with connection to database, please check the database connection.'}}
+            yield {'status': 'there is problemt with connection to database, please check the database connection.'}
 
     else:
         _content = {'ticket_id':response.ticket_id,

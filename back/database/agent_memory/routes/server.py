@@ -12,7 +12,7 @@ from shared import redis_client
 
 app = FastAPI()
 
-origins = ["http://localhost", "http://localhost:5174", "http://127.0.0.1:5174", "http://127.0.0.1:8000"]
+origins = ["http://localhost", "http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:8000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,10 +36,10 @@ app.include_router(payment_bp)
 #     # You can add a redis.ping() here to check connection
 #     print("Connecting to Redis...")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    await redis_client.close()
-    print("Redis connection closed.")
+# @app.on_event("shutdown")
+# async def shutdown_event():
+#     await redis_client.close()
+#     print("Redis connection closed.")
 
 
 if __name__ == "__main__":

@@ -129,8 +129,9 @@ class CaseContectGraph(BaseAgent):
             f.write(png_data)
 
 async def producer(ticket_id, customer_id, customer_comment):
+    print(ticket_id, customer_id, customer_comment)
 
-    agent = CaseContectGraph(model='qwen3:32b', tools=get_all_tools())
+    agent = CaseContectGraph(model='qwen3:30b', tools=get_all_tools())
     
     agent.add_new_node("get_history", get_ticket_details_node)
 
@@ -141,7 +142,11 @@ async def producer(ticket_id, customer_id, customer_comment):
     agent.add_new_edge("get_history", "agent_node")
     agent.add_new_edge('tool_node', "agent_node")
 
-    agent.add_new_conditional_edge('agent_node', check_agent_action, {'tool':'tool_node', 'final':END})
+    agent.add_new_conditional_edge('agent_node', check_agent_action, 
+        {'tool':'tool_node',
+        "loop": "agent_node",
+         'final':END}
+    )
 
     agent._build_graph()
 
@@ -159,4 +164,4 @@ if __name__ == "__main__":
                 "Order #ORD50001: Charged twice for a 55-inch Samsung 4K TV ($600). Total shows $1200 on my card. Please refund one charge."
     )
     )
-
+ 

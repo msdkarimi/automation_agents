@@ -23,6 +23,7 @@ agent_bp = APIRouter(prefix="/agents")
 _tmp = None 
 
 async def _generator(prompt: IgniteCaseContextAgentSchema):
+
     async for chunk in producer(**prompt.dict()):
         yield f"data: {json.dumps(chunk)} \n\n"
 
@@ -42,7 +43,6 @@ async def stream_events(stream_id: str, request: Request):
     """Retrieves prompt from Redis and streams the LLM response."""
     prompt = await redis_client.get(stream_id)
     prompt = IgniteCaseContextAgentSchema.parse_raw(prompt)
-
     if prompt is None:
         async def error_generator():
             yield "data: Error: Invalid or expired request ID.\n\n"

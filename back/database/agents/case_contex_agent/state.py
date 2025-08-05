@@ -31,6 +31,7 @@ class CaseContextState(BaseModel):
     link_id: Optional[int] = None
     ticket_id: Optional[int] = None
     sop_id: Optional[str] = None
+    item_id: Optional[str] = None
     purchase_id: Optional[str] = None
     order_id: Optional[str] = None
     payment_id: Optional[str] = None
@@ -38,6 +39,7 @@ class CaseContextState(BaseModel):
     order: Optional[dict] = {}
     payment: Optional[dict] = {}
     sop: Optional[dict] = {}
+    last_routing: Optional[str] = None
 
 
 class ReactAIMessage(AIMessage):

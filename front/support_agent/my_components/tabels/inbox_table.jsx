@@ -1,9 +1,10 @@
 import { Table, Button, Modal, Select, Divider, Group, SimpleGrid, Badge, ActionIcon, Pill, Stack, Card, Code, Accordion, Text, Container , Box, Space, Loader} from '@mantine/core';
 import { IconCirclesRelation, IconRobot, IconBrain, IconDots, IconTool, IconPlayerPlay, IconMessageChatbot } from '@tabler/icons-react';
 import { useElementSize } from '@mantine/hooks';
-import { useState} from 'react';
+import { useState, useEffect} from 'react';
 import { AgentActions } from '../../custom_types/models';
 import { start_chat_with_case_context_agent } from '../../APIs/agent_api';
+
 
 
 export function MyTable(props) {
@@ -43,6 +44,7 @@ export function MyTable(props) {
               modal2Opened={props.modal2Opened}
               setModal2Opened={props.setModal2Opened}
               eventSourceRef={props.eventSourceRef}
+              setSignal={props.setSignal}
 
             />
           ))}
@@ -84,7 +86,7 @@ function Row(props) {
         size="80%"
       >
         {props.selection && (
-          <ModalContent agent_response={props.agent_response} selection={props.selection} setSelection={props.setSelection} 
+          <ModalContent setSignal={props.setSignal} agent_response={props.agent_response} selection={props.selection} setSelection={props.setSelection} 
           agent_respondes={props.agent_respondes} setAgent_respondes={props.setAgent_respondes} modal2Opened={props.modal2Opened}
               setModal2Opened={props.setModal2Opened} eventSourceRef={props.eventSourceRef} />
         )}
@@ -95,6 +97,7 @@ function Row(props) {
 
 function ModalContent(props){
   const { ref, width, height } = useElementSize();
+  console.log(props.selection)
 
   const[caseContextThink, setCaseContextThink] = useState([]);
   const[caseContextChat, setCaseContextChat] = useState([]);
@@ -109,10 +112,6 @@ function ModalContent(props){
 
   const caseContextHandler = ()=>{
       props.setModal2Opened((oldvalue)=>{return !oldvalue})
-
-      
-
-
       init_chat().then(
         (sse)=>{
           props.eventSourceRef.current = sse
@@ -143,11 +142,6 @@ function ModalContent(props){
                   return [...old_vlaues, new AgentActions(chat_bot.id, null, null)]
                 })
               }
-              // else if (chat_bot.type === 'tool'){
-              //   props.setAgent_respondes((old_vlaues)=>{
-              //     return [...old_vlaues, new AgentActions(chat_bot.id, null, null, [], [], [chat_bot])]
-              //   })
-              // }
 
               if (chat_bot.type === "chat" && chat_bot.think ){
                 props.setAgent_respondes(prevItems => {
@@ -203,22 +197,14 @@ function ModalContent(props){
                         return newItems;
                         
                       });
-              }
-
-          
-
-              
+              }              
             }
             sse.onerror = (err) => {
               console.error('EventSource failed:', err);
             sse.close();
       };};
 
-          
-
-        
         })
-
   }
   
 
@@ -300,7 +286,7 @@ function ModalContent(props){
           <Button onClick={caseContextHandler} leftSection={<IconRobot size={18} />} variant="filled" color="violet">Invoke Case Contex Agent</Button> <Button leftSection={<IconRobot size={18} />} variant="filled" color="pink">Invoke Standard Operating Procedure Agent</Button>
         </Group>
         
-        <CaseContextAgent setCaseContextThink={setCaseContextThink} caseContextThink={caseContextThink} eventSourceRef={props.eventSourceRef} agent_respondes={props.agent_respondes} setAgent_respondes={props.setAgent_respondes}  setModal2Opened={props.setModal2Opened} modal2Opened={props.modal2Opened} />
+        <CaseContextAgent setSignal={props.setSignal} setCaseContextThink={setCaseContextThink} caseContextThink={caseContextThink} eventSourceRef={props.eventSourceRef} agent_respondes={props.agent_respondes} setAgent_respondes={props.setAgent_respondes}  setModal2Opened={props.setModal2Opened} modal2Opened={props.modal2Opened} />
 
         </SimpleGrid>
 
@@ -339,7 +325,7 @@ function CaseContextAgent(props){
       {props.agent_respondes.map((elem) => 
         ( 
           // console.log(elem);
-          <Rows2 key={elem.the_id} agent_respondes={elem} />
+          <Rows2 setSignal={props.setSignal} key={elem.the_id} agent_respondes={elem} />
         )
 )}
     </Stack>    
@@ -361,13 +347,14 @@ function Rows2(props){
         <Card bg="#e8ebe9fb" shadow="xl" padding="lg" radius="md" mt={10} mb={10}  w="100%" h="100%">
           <Accordion>
             <Accordion.Item  key={props.agent_respondes.the_id} value={props.agent_respondes.the_id}>
-              <Accordion.Control  bg="rgba(184, 184, 184, 0.3)" icon={<IconBrain/>} >Thoughts</Accordion.Control>
+              <Accordion.Control  bg="rgba(184, 184, 184, 0.3)" icon={<IconBrain/>} ><Text size="lg" fw={600} variant="gradient" gradient={{ from: 'violet', to: 'cyan', deg: 164 }}>Thoughts</Text>
+              </Accordion.Control>
               <Accordion.Panel>{props.agent_respondes.think.length > 0 ? props.agent_respondes.think.map((_)=>_) : <Loader color="blue"  /> }</Accordion.Panel>
             </Accordion.Item>
           </Accordion>
           <Space h="xs" />
           <Group>
-            <AgentAction agent_respondes={props.agent_respondes}  />
+            <AgentAction setSignal={props.setSignal} agent_respondes={props.agent_respondes}  />
           </Group>
         </Card>
       </Box>
@@ -404,11 +391,42 @@ else if (props.agent_respondes.is_end)
 
 
 function AgentAction (props){
-  if (props.agent_respondes.tool.length > 0) {
+
+useEffect(() => {
+    const tool = props.agent_respondes?.tool?.[0];
+    if (tool && tool.name === 'update_linked_information_database') {
+      props.setSignal(old => !old);
+    }
+  }, [props.agent_respondes.tool]); // re-run when tool array changes
+
+  if (props.agent_respondes.tool.length > 0 && props.agent_respondes.chat.length > 0){
+    return(
+          <>
+            <Space h="xs" />
+            <Box style={{ overflowX: 'auto' }}>
+              <Group>
+                <Text>
+                  Tool calling:
+                </Text>
+                  <Code>
+                    {props.agent_respondes.tool[0].name} ( { JSON.stringify(props.agent_respondes.tool[0].args)} )
+                  </Code>
+              </Group>
+            </Box>
+            <Space h="xs" />
+            <Box style={{ overflowX: 'auto' }}>
+              <Text>
+                {props.agent_respondes.chat.map((_)=>_)}
+              </Text>
+            </Box> 
+          </>
+    )
+  }
+  else if (props.agent_respondes.tool.length > 0) {
     return(
       <>
         <Space h="xs" />
-        <Box >
+        <Box style={{ overflowX: 'auto' }}>
           <Group>
             <Text>
                Tool calling:
@@ -425,7 +443,7 @@ function AgentAction (props){
     return (
       <>
         <Space h="xs" />
-        <Box >
+        <Box style={{ overflowX: 'auto' }}>
           <Text>
             {props.agent_respondes.chat.map((_)=>_)}
           </Text>

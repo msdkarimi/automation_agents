@@ -36,7 +36,7 @@ export function Inbox(props) {
         <Center  bg="var(--mantine-color-gray-light)" >
         {
           props.tickets.length!=0 ?
-          <MyTable agent_response={props.agent_response} elements={props.tickets} selection={selectedRow} setSelection={setSelectedRow} 
+          <MyTable setSignal={props.setSignal} agent_response={props.agent_response} elements={props.tickets} selection={selectedRow} setSelection={setSelectedRow} 
           opened={opened} open={open} close={close} modal2Opened={modal2Opened} setModal2Opened={setModal2Opened} eventSourceRef={eventSourceRef}/>
           :
           <Loader size={50} /> 

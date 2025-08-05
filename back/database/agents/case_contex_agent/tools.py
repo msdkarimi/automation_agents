@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from langchain_core.tools import tool
-from agent_memory.controllers.ticket_links_controllers import get_ticket_link_by_id_controller, insert_new_ticket_linke_controller
+from agent_memory.controllers.ticket_links_controllers import get_ticket_link_by_id_controller, insert_new_ticket_linke_controller, update_ticket_link_controller
 from agent_memory.controllers.orders_catalog_controllers import get_orders_by_customer_id_controller
 from agent_memory.controllers.purchase_controllers import get_purchase_by_customer_item_controller
 from agent_memory.controllers.payments_controllers import get_payment_by_customer_order_purchase_controller
@@ -10,8 +10,6 @@ from agent_memory.controllers.sop_catalog_controllers import get_all_sop_catalog
 from case_contex_agent.state import CaseContextState
 from langchain_core.messages import AIMessage
 import re
-
-# back\database\agents\case_contex_agent\tools.py
 
 @tool
 def get_ticket_details(ticket_id: int, ) -> CaseContextState:
@@ -26,8 +24,6 @@ def get_ticket_details(ticket_id: int, ) -> CaseContextState:
     response = get_ticket_link_by_id_controller(ticket_id=ticket_id)
     if isinstance(response, int):
         if response > 0:
-        #    'there is not any link associated to ticket_id={ticket_id}
-
             response = insert_new_ticket_linke_controller(ticket_id=ticket_id)
 
             if response == 0:
@@ -54,8 +50,28 @@ def get_ticket_details(ticket_id: int, ) -> CaseContextState:
 
 @tool
 def get_customer_all_orders(customer_id: str):
-    """
-    this tool is used to just give order history of given customer, this helps us to better understand which order is related to customer comment. 
+    """Retrieves the complete order history for a given customer.
+
+    This tool fetches all orders and the items within them associated with a
+    specific customer ID. It is typically the first step when a customer
+    inquires about a past purchase. The returned list should be presented
+    to the user so they can identify the specific item they are interested in.
+
+    Args:
+        customer_id (str): The unique identifier for the customer.
+
+    Returns:
+       A list of dictionaries, where each dictionary represents a
+        single item from an order. Returns an empty list if the customer has
+        no order history. Each dictionary has the following structure:
+        {
+            'order_id': str,          # The unique ID for the order
+            'order_number': str,      # The human-readable order number
+            'order_date': str,        # The date the order was placed
+            'item_id': str,           # The unique ID for the item
+            'item_name': str,         # The name of the item
+            'item_description': str   # A brief description of the item
+        }
     """
     print('called for customer=', customer_id)
 
@@ -71,22 +87,27 @@ def get_customer_all_orders(customer_id: str):
         tmp = order.item.model_dump()
         tmp.pop('id', None)
         _ordered_items.update( {f'the order_id={order.order_id} and order_number={order.order_number} for item:' :tmp })
-        # _ordered_items += f'ordered item id is {order.item.item_id}, ordered item name is: {order.item.item_name},and its description is {order.item.item_description}\n'
 
+    print(_ordered_items)
 
     return {'used_tools_results': {'status': 'success', 'tool_output': {'list_of_ordered_items':_ordered_items }}}
     
 @tool
-def update_item_state(item_id, item_info: dict):
+def update_item_orderId_state(item_id, order_id, item_info: dict):
     """
-    Identifies and updates the relevant item from the user's order history based on references in their comment.
+    Sets the context to a specific item within an order for subsequent actions.
+    This tool "selects" or "focuses on" an item that the user has confirmed.
+    It stores the item's details in the system's state, making them available for other tools. 
+    This is a crucial step to perform before calling tools that act on a specific item, such as initiating a return, checking a warranty, or getting payment details.
 
-    This tool analyzes the user's comment to extract item-related cues (such as item name or description),
-    matches them against the user's list of past orders, and selects the most relevant item.
+    You should call this tool after the user has identified an item from their
+    order history (e.g., retrieved using `get_customer_all_orders`).
+
     """
     item_info.pop('item_id', None)
     return {'used_tools_results': {'status': 'success', 'tool_output':
-                                   {'item_id': item_id, 'order': item_info}}}
+                                   {'item_id': item_id, 'order': item_info, 'order_id':order_id}}}
+
 
 @tool
 def get_purchase_by_customerId_itemId(customer_id:str, item_id:str):
@@ -178,17 +199,17 @@ def get_list_of_sop_catalogs():
 
 
 @tool
-def update_sop_state(sop_id, sop_tile):
+def update_sop_state(sop_id, sop_title):
     """
-    Selects and sets the current Standard Operating Procedure (SOP) for the conversation.
+    Selects and sets a Standard Operating Procedure (SOP) for the conversation.
 
-    This tool identifies the most relevant SOP from a list and updates the agent's
+    This tool identifies the most relevant SOP from a list of SOPs and updates the agent's
     state with its ID and title. It is crucial for focusing the conversation
     on the correct procedure to follow based on the customer's input.
     """
 
     return {'used_tools_results': {'status': 'success', 'tool_output': 
-                                {'sop_id': sop_id, 'sop': {'title': sop_tile}}}}
+                                {'sop_id': sop_id, 'sop': {'title': sop_title}}}}
 
 @tool
 def get_customer_orders(state: CaseContextState):
@@ -213,20 +234,73 @@ def get_customer_orders(state: CaseContextState):
         tmp = order.item.model_dump()
         tmp.pop('id', None)
         _ordered_items.update( {order.order_id :tmp })
-        # _ordered_items += f'ordered item id is {order.item.item_id}, ordered item name is: {order.item.item_name},and its description is {order.item.item_description}\n'
-
-
-    # return {'list_of_ordered_items': _ordered_items}
 
     return {'used_tools_results': {'status': 'success', 'tool_output': {'list_of_ordered_items': _ordered_items }}}  
+
+@tool
+def update_linked_information_database(ticket_id:int, sop_id:str=None, purchase_id:str=None, order_id:str=None, payment_id:str=None):
+    """Finalizes the ticket resolution process by saving all linked information to the database.
+
+    This tool should be called as the very last step, after all relevant information—such as 
+    Standard Operating Procedures (SOPs), purchase details, order specifics, and payment records—has 
+    been identified. It takes the ticket ID and any available entity IDs and updates the ticket's 
+    record in the database to create permanent links.
+
+    Args:
+        ticket_id (int): The unique identifier for the customer service ticket being updated.
+        sop_id (str, optional): The ID of the Standard Operating Procedure (SOP). Defaults to None.
+        purchase_id (str, optional): The ID of the customer's purchase. Defaults to None.
+        order_id (str, optional): The ID of the specific order. Defaults to None.
+        payment_id (str, optional): The ID of the payment transaction. Defaults to None.
+
+    Returns:
+        dict: A dictionary containing a structured result of the operation, which is optimal for the LLM.
+    """
+    respons = update_ticket_link_controller(ticket_id, sop_id, purchase_id, order_id, payment_id)
+
+    # --- Updated Logic Starts Here ---
+
+    if respons == 0:
+        # Success case: Create a structured dictionary of what was linked.
+        linked_data = {}
+        if sop_id: linked_data['sop_id'] = sop_id
+        if purchase_id: linked_data['purchase_id'] = purchase_id
+        if order_id: linked_data['order_id'] = order_id
+        if payment_id: linked_data['payment_id'] = payment_id
+
+        # structured_output = {
+        #     "message": f"Linked information for ticket with id= {ticket_id} has been successfully updated and saved into the database.",
+        #     "ticket_id": ticket_id,
+        #     "updated_links": linked_data
+        # }
+        return {'used_tools_results': {'status': 'success', 'tool_output':f"last tool call was successful, linked information for ticket with id= {ticket_id} has been successfully updated and saved into the database." }}
+    else:
+        # Error case: Report what the tool was trying to link.
+        attempted_links = {
+            "sop_id": sop_id,
+            "purchase_id": purchase_id,
+            "order_id": order_id,
+            "payment_id": payment_id
+        }
+        # Filter out None values to show exactly what was attempted
+        attempted_links = {k: v for k, v in attempted_links.items() if v is not None}
+
+        error_output = {
+            "message": f"An error occurred while attempting to update ticket {ticket_id}.",
+            "ticket_id": ticket_id,
+            "attempted_links": attempted_links
+        }
+        return {'used_tools_results': {'status': 'error', 'tool_output': error_output}}
+
 
 
 def get_all_tools():
     return[
         get_customer_all_orders,
-        update_item_state,
+        update_item_orderId_state,
         get_purchase_by_customerId_itemId,
         get_payment_by_customer_order_purchase,
         get_list_of_sop_catalogs,
         update_sop_state,
+        update_linked_information_database
     ]

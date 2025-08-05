@@ -19,13 +19,14 @@ import { Item, Purchase, Ticket } from '../custom_types/models';
 
 
 export function Menu() {
-  
+
   const [activeTab, setActiveTab] = useState('home');
   const [agentResponse, setAgentResponse] = useState();
   const [tickets, setTickets] = useState([]);
   const [sop_cats, setSop_cats] = useState([]);
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [signal, setSignal] = useState(false)
 
   async function run_test_api(){
     const results = await send_message_to_agent('hi')
@@ -87,6 +88,18 @@ export function Menu() {
 
   }, [activeTab]);
 
+
+   useEffect(() => {
+
+      get_all_tickets().then(
+      (res)=>{
+        setTickets(res)
+      })    
+      .catch((error) => {
+      console.log('Failed to fetch tickets:', error)
+    })
+  }, [signal]);
+
   useEffect(() => {
 // console.log('setting all tickets0000.')
     get_all_tickets().then(
@@ -133,7 +146,7 @@ export function Menu() {
       </Tabs.List>
 
       <Tabs.Panel value="home"><Home clickHandler={handleCiteClick}/></Tabs.Panel>
-      <Tabs.Panel value="inbox"><Inbox agent_response={agentResponse} tickets={tickets} /></Tabs.Panel>
+      <Tabs.Panel value="inbox"><Inbox setSignal={setSignal} agent_response={agentResponse} tickets={tickets} /></Tabs.Panel>
       <Tabs.Panel value="sops"><SOPs sop_cats={sop_cats} /></Tabs.Panel>
       <Tabs.Panel value="orders"><Orders orders={orders} /></Tabs.Panel>
       <Tabs.Panel value="payments"><Payments payments={payments}/></Tabs.Panel>
