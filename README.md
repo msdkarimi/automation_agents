@@ -5,6 +5,17 @@
 
 The project involves building an **Intelligent Ticket Resolution Agent** designed to automate and improve the handling of support tickets by leveraging advanced AI techniques and modern software tools.
 
+
+## LLM Specification
+
+The model is initialized with the following parameters:
+
+- **model**: Specifies the language model to be used (default is `'qwen3:1.7b'`).
+- **ollama_base_url**: The base URL for the Ollama local server instance (default is `'http://localhost:11434'`).
+- **config**: Optional configuration dictionary for customizing model behavior or threading.
+- **tools**: Optional list of external tools that the model can call during execution.
+
+
 ---
 
 ## Key Components and Innovations
