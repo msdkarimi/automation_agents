@@ -13,6 +13,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
+__pycache__/
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,5 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 *.pyc
+
 
 /back/database/agent_memory/agent_venv/
