@@ -125,11 +125,11 @@ class CaseContectGraph(BaseAgent):
 
     def print_graph(self, ):
         png_data = self.graph.get_graph().draw_mermaid_png()
-        with open("graph.png", "wb") as f:
+        with open("agent_graph.png", "wb") as f:
             f.write(png_data)
 
 async def producer(ticket_id, customer_id, customer_comment):
-    print(ticket_id, customer_id, customer_comment)
+    # print(ticket_id, customer_id, customer_comment)
 
     agent = CaseContectGraph(model='qwen3:30b', tools=get_all_tools())
     
@@ -144,7 +144,7 @@ async def producer(ticket_id, customer_id, customer_comment):
 
     agent.add_new_conditional_edge('agent_node', check_agent_action, 
         {'tool':'tool_node',
-        "loop": "agent_node",
+        "reflex": "agent_node",
          'final':END}
     )
 
@@ -157,11 +157,34 @@ async def producer(ticket_id, customer_id, customer_comment):
         yield _s
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(
-        producer(1,
-                'CUST10001',
-                "Order #ORD50001: Charged twice for a 55-inch Samsung 4K TV ($600). Total shows $1200 on my card. Please refund one charge."
+
+    agent = CaseContectGraph(model='qwen3:30b', tools=get_all_tools())
+    
+    agent.add_new_node("get_history", get_ticket_details_node)
+
+    agent.add_new_node("agent_node", partial(agent_node, agent))
+    agent.add_new_node("tool_node",  partial(tool_calling_node, agent))
+
+    agent.add_new_edge(START, "get_history")
+    agent.add_new_edge("get_history", "agent_node")
+    agent.add_new_edge('tool_node', "agent_node")
+
+    agent.add_new_conditional_edge('agent_node', check_agent_action, 
+        {'tool':'tool_node',
+        "reflex": "agent_node",
+         'final':END}
     )
-    )
+
+    agent._build_graph()
+
+    agent.print_graph()
+
+
+    # import asyncio
+    # asyncio.run(
+    #     producer(1,
+    #             'CUST10001',
+    #             "Order #ORD50001: Charged twice for a 55-inch Samsung 4K TV ($600). Total shows $1200 on my card. Please refund one charge."
+    # )
+    # )
  

@@ -65,11 +65,10 @@ async def agent_node(graph, state:CaseContextState)-> CaseContextState:
 
     * **To Complete the Task:**
         - The **final step** is always to call `update_linked_information_database`. Use this tool only when you have gathered all relevant IDs based on the nature of the customer's issue.
-        - give a concise output about your actions and available information.
+        - **Provide Summary:** After the database is updated, present a concise, user-friendly summary of the findings and actions taken. For example: "I've identified the issue with order #12345 regarding a refund. I have linked the corresponding payment and purchase IDs to the ticket and flagged it for the 'Defective Item Return' procedure. The finance team will now process the refund."
+        - **End Process:** Conclude your work by outputting `**END**`.
     
     
-    1.  **Provide Summary:** After the database is updated, present a concise, user-friendly summary of the findings and actions taken. For example: "I've identified the issue with order #12345 regarding a refund. I have linked the corresponding payment and purchase IDs to the ticket and flagged it for the 'Defective Item Return' procedure. The finance team will now process the refund."
-    2.  **End Process:** Conclude your work by outputting `**END**`.
 
     **Core Principles:**
     - **Autonomy:** You decide the best sequence of tool calling based on the customer's message and the state of the context.
@@ -88,7 +87,7 @@ async def agent_node(graph, state:CaseContextState)-> CaseContextState:
 
     messages += [HumanMessage(_prompt_template_)]
 
-    if state.last_routing == 'loop':
+    if state.last_routing == 'reflex':
         messages += state.messages[-1:]
 
     response = graph.llm_with_tools.astream(messages, graph.thread_config)
@@ -135,7 +134,7 @@ async def agent_node(graph, state:CaseContextState)-> CaseContextState:
         if "END" in _final_response:
             yield {'last_routing': 'END'}
         else:
-            yield  {'messages': [AIMessage(_final_response)], 'last_routing': 'loop'}
+            yield  {'messages': [AIMessage(_final_response)], 'last_routing': 'reflex'}
 
 async def check_agent_action(state):
 
@@ -144,8 +143,8 @@ async def check_agent_action(state):
 
     if state.last_routing == 'tool':
         return 'tool'
-    elif state.last_routing == 'loop':
-        return 'loop'
+    elif state.last_routing == 'reflex':
+        return 'reflex'
     else:
         return 'final'
     
