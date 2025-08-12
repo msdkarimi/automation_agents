@@ -25,5 +25,7 @@ __pycache__/
 *.sw?
 *.pyc
 
+back/database/databse_entries_to_be_populated
+back/database/agent_memory/routes/hardcode.py
 
 /back/database/agent_memory/agent_venv/
