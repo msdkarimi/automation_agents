@@ -97,7 +97,7 @@ function Row(props) {
 
 function ModalContent(props){
   const { ref, width, height } = useElementSize();
-  console.log(props.selection)
+  // console.log(props.selection)
 
   const[caseContextThink, setCaseContextThink] = useState([]);
   const[caseContextChat, setCaseContextChat] = useState([]);
@@ -181,22 +181,27 @@ function ModalContent(props){
                       });
               }
               else if (chat_bot.type === "tool"){
-                props.setAgent_respondes(prevItems => {
-                      
-                        const newItems = [...prevItems];
-                        const lastItem = newItems[newItems.length - 1]
-                        const updateItem = new AgentActions(
-                          lastItem.the_id,
-                          null,
-                          null,
-                          lastItem.think,
-                          lastItem.chat, 
-                          [...lastItem.tool, chat_bot]
-                        )
-                        newItems[newItems.length - 1] = updateItem;
-                        return newItems;
+                if (chat_bot.phase === "start"){
+                  props.setAgent_respondes(prevItems => {
                         
-                      });
+                          const newItems = [...prevItems];
+                          const lastItem = newItems[newItems.length - 1]
+                          const updateItem = new AgentActions(
+                            lastItem.the_id,
+                            null,
+                            null,
+                            lastItem.think,
+                            lastItem.chat, 
+                            [...lastItem.tool, chat_bot]
+                          )
+                          newItems[newItems.length - 1] = updateItem;
+                          return newItems;
+                          
+                        });
+                    }
+                  else if (chat_bot.name === 'update_linked_information_database' && chat_bot.phase === "finish" ) {
+                    props.setSignal(old => !old);
+                  }
               }              
             }
             sse.onerror = (err) => {
@@ -392,12 +397,12 @@ else if (props.agent_respondes.is_end)
 
 function AgentAction (props){
 
-useEffect(() => {
-    const tool = props.agent_respondes?.tool?.[0];
-    if (tool && tool.name === 'update_linked_information_database') {
-      props.setSignal(old => !old);
-    }
-  }, [props.agent_respondes.tool]); // re-run when tool array changes
+// useEffect(() => {
+//     const tool = props.agent_respondes?.tool?.[0];
+//     if (tool && tool.name === 'update_linked_information_database') {
+//       props.setSignal(old => !old);
+//     }
+//   }, [props.agent_respondes.tool]); // re-run when tool array changes
 
   if (props.agent_respondes.tool.length > 0 && props.agent_respondes.chat.length > 0){
     return(

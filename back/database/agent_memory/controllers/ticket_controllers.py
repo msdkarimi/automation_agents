@@ -36,7 +36,7 @@ def insert_new_ticket_controller(ticket, verbose=True) -> int:
         return 2
 
 
-def get_all_tickets_controller(verbose=True):
+async def get_all_tickets_controller(verbose=True):
     """
     Returns all rows from the Ticket table.
     """

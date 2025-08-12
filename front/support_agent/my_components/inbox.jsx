@@ -8,7 +8,7 @@ export function Inbox(props) {
 
   const icon = <IconMailbox />;
 
-  const [selectedRow, setSelectedRow] = useState(null);
+
   const [opened, { open, close }] = useDisclosure(false);
   const [modal2Opened, setModal2Opened] = useState(false);
   const eventSourceRef = useRef(null);
@@ -36,7 +36,7 @@ export function Inbox(props) {
         <Center  bg="var(--mantine-color-gray-light)" >
         {
           props.tickets.length!=0 ?
-          <MyTable setSignal={props.setSignal} agent_response={props.agent_response} elements={props.tickets} selection={selectedRow} setSelection={setSelectedRow} 
+          <MyTable setSignal={props.setSignal} agent_response={props.agent_response} elements={props.tickets} selection={props.selectedRow} setSelection={props.setSelectedRow} 
           opened={opened} open={open} close={close} modal2Opened={modal2Opened} setModal2Opened={setModal2Opened} eventSourceRef={eventSourceRef}/>
           :
           <Loader size={50} /> 

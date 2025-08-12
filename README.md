@@ -6,11 +6,11 @@
 The project involves building an **Intelligent Ticket Resolution Agent** designed to automate and improve the handling of support tickets by leveraging advanced AI techniques and modern software tools.
 
 
-## LLM Specification
+## Agent Specification
 
 The model is initialized with the following parameters:
 
-- **model**: Specifies the language model to be used (default is `'qwen3:1.7b'`).
+- **model**: Specifies the language model to be used (default is `'qwen3:30b'`).
 - **ollama_base_url**: The base URL for the Ollama local server instance (default is `'http://localhost:11434'`).
 - **config**: Optional configuration dictionary for customizing model behavior or threading.
 - **tools**: Optional list of external tools that the model can call during execution.
@@ -62,3 +62,6 @@ From **agent_node**, the flow can branch into three possible directions:
 - **Reflex Loop**: The agent can loop back to **agent_node** for reflexive reasoning or iterative processing before reaching a final decision.
 
 This structured workflow enables the agent to dynamically interact with tools, maintain context, and decide when to conclude its task effectively.
+
+[Watch the demo on YouTube](https://www.youtube.com/watch?v=WTT2oSbEaro)
+

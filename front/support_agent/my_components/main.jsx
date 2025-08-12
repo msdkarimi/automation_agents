@@ -27,6 +27,7 @@ export function Menu() {
   const [orders, setOrders] = useState([]);
   const [payments, setPayments] = useState([]);
   const [signal, setSignal] = useState(false)
+  const [selectedRow, setSelectedRow] = useState(null);
 
   async function run_test_api(){
     const results = await send_message_to_agent('hi')
@@ -94,6 +95,10 @@ export function Menu() {
       get_all_tickets().then(
       (res)=>{
         setTickets(res)
+        if (selectedRow != null){
+          const filtered_ticket = res.find(ticket => ticket.id === selectedRow.id);
+          setSelectedRow(filtered_ticket);
+        }
       })    
       .catch((error) => {
       console.log('Failed to fetch tickets:', error)
@@ -146,7 +151,7 @@ export function Menu() {
       </Tabs.List>
 
       <Tabs.Panel value="home"><Home clickHandler={handleCiteClick}/></Tabs.Panel>
-      <Tabs.Panel value="inbox"><Inbox setSignal={setSignal} agent_response={agentResponse} tickets={tickets} /></Tabs.Panel>
+      <Tabs.Panel value="inbox"><Inbox setSignal={setSignal} agent_response={agentResponse} tickets={tickets} selectedRow={selectedRow} setSelectedRow={setSelectedRow} /></Tabs.Panel>
       <Tabs.Panel value="sops"><SOPs sop_cats={sop_cats} /></Tabs.Panel>
       <Tabs.Panel value="orders"><Orders orders={orders} /></Tabs.Panel>
       <Tabs.Panel value="payments"><Payments payments={payments}/></Tabs.Panel>

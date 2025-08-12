@@ -109,8 +109,8 @@ class CaseContectGraph(BaseAgent):
             if kind == "on_tool_start":
                 yield {"type":"tool", "name":event["name"], "args":event["data"].get("input"), "phase":"start", "id":event["run_id"]}
                  
-            # if kind == "on_tool_end":
-            #     yield {"type":"tool", "name":event["name"], "phase":"finish", "id":event["run_id"]}
+            if kind == "on_tool_end":
+                yield {"type":"tool", "name":event["name"], "phase":"finish", "id":event["run_id"]}
                 
         
         yield {"type":"agent", "phase":"finish", "id":"6789"}

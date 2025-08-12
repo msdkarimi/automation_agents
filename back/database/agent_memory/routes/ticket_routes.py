@@ -16,9 +16,9 @@ def insert_new_ticket(ticket: NewTicket, req:Request, res:Response):
     return result
 
 @tickets_bp.get("/", response_model=List[TicketSchema])
-def get_all_tickets(req:Request, res:Response):
-    result = get_all_tickets_controller()
-    print('in func',result)
+async def get_all_tickets(req:Request, res:Response):
+    result = await get_all_tickets_controller()
+    print('all tickets are retirvied')
     return result
 
 
